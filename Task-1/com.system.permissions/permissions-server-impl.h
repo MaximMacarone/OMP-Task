@@ -2,6 +2,7 @@
 #include "permissions-server.h"
 #include <iostream>
 #include <sqlite3.h>
+#include <unistd.h>
 
 
 class PermissionService: public sdbus::AdaptorInterfaces<com::system::permissions_adaptor> {
@@ -20,15 +21,19 @@ public:
     }
 protected:
     void RequestPermission(const int32_t& permissionEnumCode) override {
-        pid_t pid;
+        uint32_t pid;
+        char buf[512];
         
         sdbus::ObjectPath destination{"/org/freedesktop/DBus"};
         sdbus::ServiceName serviceName{"org.freedesktop.DBus"};
 
-        //auto connection = sdbus::createProxy(serviceName, destination);
-        //connection->callMethod("GetConnectionUnixProcessID").onInterface("org.freedesktop.DBus").withArguments(m_object_->getCurrentlyProcessedMessage().getSender()).storeResultsTo(pid);
+        auto connection = sdbus::createProxy(serviceName, destination);
 
-        savePermissionRequest(69, "smth", permissionEnumCode, 69);
+
+        connection->callMethod("GetConnectionUnixProcessID").onInterface("org.freedesktop.DBus").withArguments(getObject().getCurrentlyProcessedMessage().getSender()).storeResultsTo(pid);
+        get_exe_for_pid(pid, buf, 512);
+
+        savePermissionRequest(pid, buf, permissionEnumCode, 69);
 
         emitPermissionGranted(true);
         return;
@@ -91,5 +96,11 @@ private:
 
         sqlite3_finalize(stmt);
     }
+
+    int get_exe_for_pid(pid_t pid, char *buf, size_t bufsize) {
+    char path[32];
+    sprintf(path, "/proc/%d/exe", pid);
+    return readlink(path, buf, bufsize);
+}
 };
 
