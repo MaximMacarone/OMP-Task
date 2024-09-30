@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sqlite3.h>
 #include <unistd.h>
+#include <chrono>
 
 
 class PermissionService: public sdbus::AdaptorInterfaces<com::system::permissions_adaptor> {
@@ -31,17 +32,36 @@ protected:
 
 
         connection->callMethod("GetConnectionUnixProcessID").onInterface("org.freedesktop.DBus").withArguments(getObject().getCurrentlyProcessedMessage().getSender()).storeResultsTo(pid);
-        get_exe_for_pid(pid, buf, 512);
+        buf[getObjectPath(pid, buf, 512)] = 0;
 
-        savePermissionRequest(pid, buf, permissionEnumCode, 69);
+        savePermissionRequest(pid, buf, permissionEnumCode);
 
         emitPermissionGranted(true);
         return;
     }
 
     bool CheckApplicationHasPermission(const std::string& applicationExecPath, const int32_t& permissionEnumCode) override {
-        emitPermissionChecked(true);
-        return true;
+        const char* selectSQL = "SELECT COUNT(*) FROM Permissions WHERE ExecPath = ? AND PermissionCode = ?;";
+    
+        sqlite3_stmt* stmt;
+        int result = 0;
+        
+        if (sqlite3_prepare_v2(db_, selectSQL, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt, 1, applicationExecPath.c_str(), -1, SQLITE_STATIC);
+            sqlite3_bind_int(stmt, 2, permissionEnumCode);
+            
+            if (sqlite3_step(stmt) == SQLITE_ROW) {
+                result = sqlite3_column_int(stmt, 0);
+            }
+
+            sqlite3_finalize(stmt);
+        } else {
+            std::cerr << "Failed to prepare SQL statement: " << sqlite3_errmsg(db_) << std::endl;
+        }
+
+        bool hasPermission = result > 0;
+        emitPermissionChecked(hasPermission);
+        return hasPermission;
     }
 
 private:
@@ -60,8 +80,7 @@ private:
                                      "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
                                      "ClientPID INTEGER, "
                                      "ExecPath TEXT, "
-                                     "PermissionCode INTEGER, "
-                                     "Timestamp INTEGER);";
+                                     "PermissionCode INTEGER);";
         
         char* errorMessage = nullptr;
         if (sqlite3_exec(db, createTableSQL, nullptr, nullptr, &errorMessage) != SQLITE_OK) {
@@ -74,8 +93,8 @@ private:
         return db;
     }
 
-        void savePermissionRequest(pid_t clientPID, const std::string& execPath,const int32_t& permissionCode, uint64_t timestamp) {
-        const char* insertSQL = "INSERT INTO Permissions (ClientPID, ExecPath, PermissionCode, Timestamp) VALUES (?, ?, ?, ?);";
+        void savePermissionRequest(pid_t clientPID, const std::string& execPath,const int32_t& permissionCode) {
+        const char* insertSQL = "INSERT INTO Permissions (ClientPID, ExecPath, PermissionCode) VALUES (?, ?, ?);";
         sqlite3_stmt* stmt;
 
         if (sqlite3_prepare_v2(db_, insertSQL, -1, &stmt, nullptr) != SQLITE_OK) {
@@ -86,7 +105,6 @@ private:
         sqlite3_bind_int(stmt, 1, clientPID);
         sqlite3_bind_text(stmt, 2, execPath.c_str(), -1, SQLITE_STATIC);
         sqlite3_bind_int(stmt, 3, permissionCode);
-        sqlite3_bind_int64(stmt, 4, static_cast<sqlite3_int64>(timestamp));
 
         if (sqlite3_step(stmt) != SQLITE_DONE) {
             std::cerr << "Failed to execute statement: " << sqlite3_errmsg(db_) << std::endl;
@@ -97,10 +115,10 @@ private:
         sqlite3_finalize(stmt);
     }
 
-    int get_exe_for_pid(pid_t pid, char *buf, size_t bufsize) {
+    int getObjectPath(pid_t pid, char *buf, size_t bufsize) {
     char path[32];
     sprintf(path, "/proc/%d/exe", pid);
     return readlink(path, buf, bufsize);
-}
+    }
 };
 

@@ -1,4 +1,5 @@
 #include "permissions-client-impl.h"
+#include <chrono>
 
 int main() {
     sdbus::ServiceName destination{"com.system.permissions"};
