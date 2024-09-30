@@ -1,8 +1,13 @@
 find_package(sdbus-c++ REQUIRED)
 
-add_executable(permissions-server com.system.permissions/permissions-server.cpp)
-target_link_libraries(permissions-server sdbus-c++)
+find_package (SQLite3)
 
-add_executable(permissions-client com.system.permissions/permissions-client.cpp)
-target_link_libraries(permissions-client sdbus-c++)
+include_directories(${SQLite3_INCLUDE_DIRS})
+
+add_executable(server com.system.permissions/server.cpp)
+target_link_libraries(server sdbus-c++)
+target_link_libraries(server sqlite3)
+
+add_executable(client com.system.permissions/client.cpp)
+target_link_libraries(client sdbus-c++)
 

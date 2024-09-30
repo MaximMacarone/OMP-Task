@@ -33,7 +33,15 @@ protected:
 
     void registerAdaptor()
     {
-        m_object.addVTable(sdbus::registerMethod("GetSystemTime").withOutputParamNames("systemTime").implementedAs([this](){ return this->GetSystemTime(); })).forInterface(INTERFACE_NAME);
+        m_object.addVTable( sdbus::registerMethod("GetSystemTime").withOutputParamNames("systemTime").implementedAs([this](){ return this->GetSystemTime(); })
+                          , sdbus::registerSignal("AquiredSystemTime").withParameters<uint64_t>("systemTime")
+                          ).forInterface(INTERFACE_NAME);
+    }
+
+public:
+    void emitAquiredSystemTime(const uint64_t& systemTime)
+    {
+        m_object.emitSignal("AquiredSystemTime").onInterface(INTERFACE_NAME).withArguments(systemTime);
     }
 
 private:

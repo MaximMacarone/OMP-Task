@@ -5,5 +5,8 @@
         <method name="GetSystemTime">
             <arg type="t" name="systemTime" direction="out" />
         </method>
+        <signal name="AquiredSystemTime">
+            <arg type="t" name="systemTime" />
+        </signal>
     </interface>
 </node>

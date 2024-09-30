@@ -33,7 +33,10 @@ protected:
 
     void registerProxy()
     {
+        m_proxy.uponSignal("AquiredSystemTime").onInterface(INTERFACE_NAME).call([this](const uint64_t& systemTime){ this->onAquiredSystemTime(systemTime); });
     }
+
+    virtual void onAquiredSystemTime(const uint64_t& systemTime) = 0;
 
 public:
     uint64_t GetSystemTime()

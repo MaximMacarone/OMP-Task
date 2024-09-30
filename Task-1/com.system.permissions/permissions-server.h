@@ -35,7 +35,20 @@ protected:
     {
         m_object.addVTable( sdbus::registerMethod("RequestPermission").withInputParamNames("permissionEnumCode").implementedAs([this](const int32_t& permissionEnumCode){ return this->RequestPermission(permissionEnumCode); })
                           , sdbus::registerMethod("CheckApplicationHasPermission").withInputParamNames("applicationExecPath", "permissionEnumCode").withOutputParamNames("hasPermission").implementedAs([this](const std::string& applicationExecPath, const int32_t& permissionEnumCode){ return this->CheckApplicationHasPermission(applicationExecPath, permissionEnumCode); })
+                          , sdbus::registerSignal("PermissionGranted").withParameters<bool>("GrantedPermission")
+                          , sdbus::registerSignal("PermissionChecked").withParameters<bool>("CheckedPermission")
                           ).forInterface(INTERFACE_NAME);
+    }
+
+public:
+    void emitPermissionGranted(const bool& GrantedPermission)
+    {
+        m_object.emitSignal("PermissionGranted").onInterface(INTERFACE_NAME).withArguments(GrantedPermission);
+    }
+
+    void emitPermissionChecked(const bool& CheckedPermission)
+    {
+        m_object.emitSignal("PermissionChecked").onInterface(INTERFACE_NAME).withArguments(CheckedPermission);
     }
 
 private:

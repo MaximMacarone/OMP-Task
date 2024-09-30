@@ -33,7 +33,12 @@ protected:
 
     void registerProxy()
     {
+        m_proxy.uponSignal("PermissionGranted").onInterface(INTERFACE_NAME).call([this](const bool& GrantedPermission){ this->onPermissionGranted(GrantedPermission); });
+        m_proxy.uponSignal("PermissionChecked").onInterface(INTERFACE_NAME).call([this](const bool& CheckedPermission){ this->onPermissionChecked(CheckedPermission); });
     }
+
+    virtual void onPermissionGranted(const bool& GrantedPermission) = 0;
+    virtual void onPermissionChecked(const bool& CheckedPermission) = 0;
 
 public:
     void RequestPermission(const int32_t& permissionEnumCode)

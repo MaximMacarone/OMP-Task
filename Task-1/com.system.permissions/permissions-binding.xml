@@ -10,5 +10,11 @@
             <arg type="i" name="permissionEnumCode" direction="in" />
             <arg type="b" name="hasPermission" direction="out" />
         </method>
+        <signal name="PermissionGranted">
+        	<arg type="b" name="GrantedPermission" />
+        </signal>
+        <signal name="PermissionChecked">
+            <arg type="b" name="CheckedPermission" />
+        </signal>
     </interface>
 </node>
