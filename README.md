@@ -48,7 +48,7 @@ make
 
 3. Сборка сервиса com.system.time:
 ```bash
-cd .Task-2/
+cd Task-2/
 mkdir build
 cd build
 cmake ..
