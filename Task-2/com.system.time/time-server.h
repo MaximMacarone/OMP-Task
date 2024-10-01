@@ -13,44 +13,46 @@
 namespace com {
 namespace system {
 
-class time_adaptor
-{
+class time_adaptor {
 public:
-    static constexpr const char* INTERFACE_NAME = "com.system.time";
+  static constexpr const char *INTERFACE_NAME = "com.system.time";
 
 protected:
-    time_adaptor(sdbus::IObject& object)
-        : m_object(object)
-    {
-    }
+  time_adaptor(sdbus::IObject &object) : m_object(object) {}
 
-    time_adaptor(const time_adaptor&) = delete;
-    time_adaptor& operator=(const time_adaptor&) = delete;
-    time_adaptor(time_adaptor&&) = delete;
-    time_adaptor& operator=(time_adaptor&&) = delete;
+  time_adaptor(const time_adaptor &) = delete;
+  time_adaptor &operator=(const time_adaptor &) = delete;
+  time_adaptor(time_adaptor &&) = delete;
+  time_adaptor &operator=(time_adaptor &&) = delete;
 
-    ~time_adaptor() = default;
+  ~time_adaptor() = default;
 
-    void registerAdaptor()
-    {
-        m_object.addVTable( sdbus::registerMethod("GetSystemTime").withOutputParamNames("systemTime").implementedAs([this](){ return this->GetSystemTime(); })
-                          , sdbus::registerSignal("AquiredSystemTime").withParameters<uint64_t>("systemTime")
-                          ).forInterface(INTERFACE_NAME);
-    }
+  void registerAdaptor() {
+    m_object
+        .addVTable(
+            sdbus::registerMethod("GetSystemTime")
+                .withOutputParamNames("systemTime")
+                .implementedAs([this]() { return this->GetSystemTime(); }),
+            sdbus::registerSignal("AquiredSystemTime")
+                .withParameters<uint64_t>("systemTime"))
+        .forInterface(INTERFACE_NAME);
+  }
 
 public:
-    void emitAquiredSystemTime(const uint64_t& systemTime)
-    {
-        m_object.emitSignal("AquiredSystemTime").onInterface(INTERFACE_NAME).withArguments(systemTime);
-    }
+  void emitAquiredSystemTime(const uint64_t &systemTime) {
+    m_object.emitSignal("AquiredSystemTime")
+        .onInterface(INTERFACE_NAME)
+        .withArguments(systemTime);
+  }
 
 private:
-    virtual uint64_t GetSystemTime() = 0;
+  virtual uint64_t GetSystemTime() = 0;
 
 private:
-    sdbus::IObject& m_object;
+  sdbus::IObject &m_object;
 };
 
-}} // namespaces
+} // namespace system
+} // namespace com
 
 #endif

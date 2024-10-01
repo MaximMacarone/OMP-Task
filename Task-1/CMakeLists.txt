@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.22)
+project(Task-1)
 find_package(sdbus-c++ REQUIRED)
 
 find_package (SQLite3)

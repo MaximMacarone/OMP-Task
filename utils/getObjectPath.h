@@ -1,4 +1,5 @@
 #include <sdbus-c++/sdbus-c++.h>
+#include <unistd.h>
 #include <string>
 
 std::string getObjectPath(pid_t pid) {
