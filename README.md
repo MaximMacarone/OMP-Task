@@ -10,7 +10,7 @@ gdbus call -e -d com.system.permissions -o /com/system/permissions -m com.system
 ```
 Метод позволяет запросить разрешение у сервиса. Сервис перед выдачей разрешение получает путь до исполняемого файла, вызвавшего метод и сохраняет в базу данных SQLite.
 ```cpp
-void RequestPermission(permissionEnumCode: Int)
+bool CheckApplicationHasPermission(applicationPath: String, permissionEnumCode: Int)
 ```
 Пример использования
 ```bash
