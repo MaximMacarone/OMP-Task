@@ -41,6 +41,11 @@ void getSystemTime() {
     sdbus::ObjectPath objectPath{"/com/system/time"};
 
     TimeProxy timeProxy(std::move(destination), std::move(objectPath));
-    timeProxy.GetSystemTime();
+    try {
+        timeProxy.GetSystemTime();
+    } catch(const sdbus::Error& e) {
+        std::cerr << e.getName() << " : " << e.getMessage() << std::endl;
+    }
+
     sleep(1);
 }

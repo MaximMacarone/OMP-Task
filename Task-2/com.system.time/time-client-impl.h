@@ -16,6 +16,6 @@ public:
     }
 protected:
     void onAquiredSystemTime(const uint64_t& systemTime) {
-        std::cout << systemTime;
+        std::cout << systemTime << std::endl;
     }
 };

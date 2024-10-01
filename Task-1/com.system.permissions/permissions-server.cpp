@@ -9,5 +9,4 @@ int main(int argv, char* argc[]) {
     PermissionService permissionService(*connection, objectPath);
 
     connection->enterEventLoop();
-    
 }

@@ -16,10 +16,10 @@ public:
     }
 protected:
     void onPermissionGranted(const bool& PermissionGranted) {
-        std::cout << "Permission granted";
+        std::cout << "Permission granted\n";
     }
     void onPermissionChecked(const bool& CheckedPermission) {
-        std::cout << "Permission checked";
+        std::cout << "Permission checked\n";
     }
 };
 

@@ -4,6 +4,7 @@
 #include <sqlite3.h>
 #include <unistd.h>
 #include <chrono>
+#include "../../utils/getObjectPath.h"
 
 
 class PermissionService: public sdbus::AdaptorInterfaces<com::system::permissions_adaptor> {
@@ -23,18 +24,15 @@ public:
 protected:
     void RequestPermission(const int32_t& permissionEnumCode) override {
         uint32_t pid;
-        char buf[512];
         
         sdbus::ObjectPath destination{"/org/freedesktop/DBus"};
         sdbus::ServiceName serviceName{"org.freedesktop.DBus"};
 
         auto connection = sdbus::createProxy(serviceName, destination);
 
-
         connection->callMethod("GetConnectionUnixProcessID").onInterface("org.freedesktop.DBus").withArguments(getObject().getCurrentlyProcessedMessage().getSender()).storeResultsTo(pid);
-        buf[getObjectPath(pid, buf, 512)] = 0;
-
-        savePermissionRequest(pid, buf, permissionEnumCode);
+        std::string execPath = getObjectPath(pid);
+        savePermissionRequest(pid, execPath, permissionEnumCode);
 
         emitPermissionGranted(true);
         return;
@@ -113,12 +111,6 @@ private:
         }
 
         sqlite3_finalize(stmt);
-    }
-
-    int getObjectPath(pid_t pid, char *buf, size_t bufsize) {
-    char path[32];
-    sprintf(path, "/proc/%d/exe", pid);
-    return readlink(path, buf, bufsize);
     }
 };
 
