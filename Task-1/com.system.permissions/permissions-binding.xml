@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<node name="/com/system/permissions">
+    <interface name="com.system.permissions">
+        <method name="RequestPermission">
+            <arg type="i" name="permissionEnumCode" direction="in" />
+        </method>
+        <method name="CheckApplicationHasPermission">
+            <arg type="s" name="applicationExecPath" direction="in" />
+            <arg type="i" name="permissionEnumCode" direction="in" />
+            <arg type="b" name="hasPermission" direction="out" />
+        </method>
+        <signal name="PermissionGranted">
+        	<arg type="b" name="GrantedPermission" />
+        </signal>
+        <signal name="PermissionChecked">
+            <arg type="b" name="CheckedPermission" />
+        </signal>
+    </interface>
+</node>
